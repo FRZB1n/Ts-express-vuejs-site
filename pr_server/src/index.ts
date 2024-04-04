@@ -16,5 +16,5 @@ app.use("/", router);
 app.listen(port, () => {
   console.log(`[server]: Server is running at http://localhost:${port}`);
 });
-const db = "mongodb+srv://FRZ:ghio50541@cluster0.nb1hmv6.mongodb.net/test";
+const db = "";
 connect({ db });
