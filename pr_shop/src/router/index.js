@@ -74,6 +74,22 @@ const routes = [
  
     component: () => import('../views/ProfileView.vue')
   
+  },
+  {
+    path: '/tickets',
+    name: 'tickets',
+  
+ 
+    component: () => import('../views/TicketsView.vue')
+  
+  },
+  {
+    path: '/one_ticket',
+    name: 'one_ticket',
+  
+ 
+    component: () => import('../views/OneTicketView.vue')
+  
   }
 ]
 

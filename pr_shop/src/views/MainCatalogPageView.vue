@@ -63,7 +63,7 @@
                 </div>
                 
             </div>
-            <FooterView />
+            <FooterView style="position:fixed;width: 100%; bottom: 0;"/>
             <transition>
                 <div class="popup" v-if="popupVisible">Товар добавлен в корзину</div>
             </transition>
@@ -218,11 +218,12 @@ export default {
     align-items: flex-start;
 }
 .goods_list_wrapper{
+    gap: 30px;
     row-gap: 40px;
     flex-wrap: wrap;
     margin-left: 40px;
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
 }
 .txt_input{
     width: 200px;

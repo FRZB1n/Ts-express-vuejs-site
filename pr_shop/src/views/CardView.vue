@@ -16,7 +16,7 @@
                         <span class="name">{{ card.length }} товара</span>
                         <span class="name cost">{{ sum  }}</span>
                     </div>
-                    <btn text="Перейти к оформлению" clr="white"/>
+                    <btn text="Сделать заказ" clr="white" @click="make_order()"/>
                 </div>
             </div>
 
@@ -27,6 +27,9 @@
             <div>Empty :(</div>
         </div>
         <FooterView id="ed"/>
+        <transition>
+                <div class="popup" v-if="popupVisible">Заказ создан</div>
+        </transition>
     </div>
 </template>
 
@@ -41,7 +44,8 @@ export default {
         return {
            card:[],
            loaded:false,
-           sum:0
+           sum:0,
+           popupVisible:false
         }
     },
     components: {
@@ -52,7 +56,7 @@ export default {
     },
     async beforeCreate(){
         if(!localStorage.getItem("user_id"))
-            this.$router.push('/auth')
+            return this.$router.push('/auth')
 
         const resp = await serv.get_user_card(localStorage.getItem("user_id"));
         if(resp.data)
@@ -66,6 +70,23 @@ export default {
         this.loaded = true;
     },
     methods:{
+        show_notif(){
+            this.popupVisible = true; 
+
+            
+            setTimeout(() => {
+                this.popupVisible = false;
+                this.$router.go();
+            }, 3000);
+        },
+        async make_order(){
+            const resp = await serv.make_order(localStorage.getItem("user_id"), this.card)
+            console.log(resp.data)
+            if(resp.data){
+                this.show_notif()
+            }
+
+        },
         to_delete(val){
             
             this.card.forEach(el => {
@@ -117,6 +138,18 @@ export default {
 </script>
 
 <style scoped>
+.popup {
+    color:black;
+    position: fixed;
+    top: 30px; /* Отступ сверху */
+    right: 30px; /* Отступ справа */
+    background-color: green; /* Цвет фона попапа */
+    padding: 10px;
+    border-radius: 5px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); /* Тень */
+    z-index: 999; /* Отображение над остальным контентом */
+    /* Дополнительные стили, такие как ширина, высота, шрифт и т.д., могут быть добавлены по вашему усмотрению */
+}
 #ed{
     position: fixed;
     bottom: 0;

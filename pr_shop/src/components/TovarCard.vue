@@ -1,10 +1,12 @@
 <template>
 
     <div class="popular_card_wrapper clickable">
-        <div class="popular_card" id="edit" :style="{ 'background-image': 'url(' + getImagePath() + ')' }">
-        </div>
-        <span class="main_text">{{ product.name }}</span>
-        <span class="description">{{ product.description }}</span>
+        <!-- <div style="display: flex;"> -->
+            <div class="popular_card" id="edit" :style="{ 'background-image': 'url(' + getImagePath() + ')' }">
+            </div>
+            <span class="main_text">{{ product.name }}</span>
+            <span class="description">{{ product.description }}</span>
+        <!-- </div> -->
         <div class="btn_wrapper">
             <btn class='btn' text="Подробнее" clr="black" />
             <span>{{ product.cost }}$</span>
@@ -93,10 +95,12 @@ span {
 }
 
 .popular_card_wrapper {
+    /* height: 469px; */
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     align-items: center;
+
 }
 
 .popular_card {

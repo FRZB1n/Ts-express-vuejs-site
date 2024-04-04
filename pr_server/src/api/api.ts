@@ -5,7 +5,7 @@ import order from '../controllers/orders_controller';
 import user from '../controllers/users_controller';
 import provider from '../controllers/providers_controller';
 import employe from '../controllers/employees_controller';
-
+import ticket from '../controllers/tickets_controller';
 import { IGoods } from '../models/goods';
 
 const router = Router();
@@ -96,24 +96,26 @@ router.post('/get_all_params', async(req,res)=>{
     let all_goods = await mb_all_goods.get_all();
     const cat = req.body.category;
     
-
-    all_goods.forEach(el => {
-        if(el.category == cat){
-            res.send(el.params)
-            return;
+    console.log("here")
+    for(var key in all_goods){
+        if(all_goods[key].category == cat){
+           
+            res.send(all_goods[key].params)
+            return
         }
+    }
 
-    });
     
     
 })
 
 
 router.post('/get_good_by_category', async(req,res)=>{
+    console.log("here")
     let mb_all_goods = new good({category:req.body.category});
     let need_goods = await mb_all_goods.get_by_category().catch((err)=>{
         console.log(err)
-        res.status(500).send("Internal Server Error");
+        // res.status(500).send("Internal Server Error");
         return;
     });
 
@@ -436,90 +438,198 @@ router.post('/redact', async(req,res)=>{
 
 })
 
-// router.post('/add_obj', async(req,res)=>{
-//     const {page, data} = req.body;
-//     delete data['_id'];
-//     switch (page) {
-//         case "empl":
-//             let mb = new employe(data)
-//             let empl = await mb.get_by_id().catch((err)=>{
-//                 console.log(err)
-//                 res.send(false)
-//             })
-
-//             if(empl){
-//                 await empl?.updateOne(new_data)
-//                 res.send(true)
-//             }
-//             else
-//                 res.send(false)
+router.post('/add_obj', async(req,res)=>{
+    const {page, data} = req.body;
+    delete data['_id'];
+    console.log(data)
+    switch (page) {
+        case "empl":
+            let mb = new employe(data)
             
-//             break;
-//         case "orders":
-//             let mb_ord = new order({id:user.to_objId(id)})
-//             let ord = await mb_ord.get_by_id().catch((err)=>{
-//                 console.log(err)
-//                 res.send(false)
-//             })
-
-//             if(ord){
-//                 await ord?.updateOne(new_data)
-//                 res.send(true)
-//             }
-//             else
-//                 res.send(false)
-//             break;
-//         case "goods":
-//             let mb_good = new good({id:user.to_objId(id)})
-//             let gd = await mb_good.get_by_id().catch((err)=>{
-//                 console.log(err)
-//                 res.send(false)
-//             })
-
-//             if(gd){
-//                 await gd?.updateOne(new_data)
-//                 res.send(true)
-//             }
-//             else
-//                 res.send(false)
-//             break;
-//         case "providers":
-//             let mb_provider = new provider({id:user.to_objId(id)})
-//             let prvrd = await mb_provider.get_by_id().catch((err)=>{
-//                 console.log(err)
-//                 res.send(false)
-//             })
-
-//             if(prvrd){
-//                 await prvrd?.updateOne(new_data)
-//                 res.send(true)
-//             }
-//             else
-//                 res.send(false)
-//             break;
-//         case "users":
-//             let mb_user = new user({id:user.to_objId(id)})
-//             let usr = await mb_user.get_by_id().catch((err)=>{
-//                 console.log(err)
-//                 res.send(false)
-//             })
+            await mb.insert().catch((err)=>{
+                console.log(err)
+                return res.send(false)
+            })
+            res.send(true)
+            break;
+        case "orders":
+            let mb_ord = new order(data)
             
-//             if(usr){
-//                 await usr?.updateOne(new_data)
-//                 res.send(true)
-//             }
-//             else
-//                 res.send(false)
+            await mb_ord.insert().catch((err)=>{
+                console.log(err)
+                return res.send(false)
+            })
+            res.send(true)
             
-//             break;
-//         default:
-//             return res.send(false)
-//             break;
-//     }
+            break;
+        case "goods":
+            let mb_good = new good(data)
+            
+            await mb_good.insert().catch((err)=>{
+                console.log(err)
+                return res.send(false)
+            })
+            res.send(true)
+            
+            break;
+        case "providers":
+            let mb_prov = new provider(data)
+            
+            await mb_prov.insert().catch((err)=>{
+                console.log(err)
+                return res.send(false)
+            })
+            res.send(true)
+            
+            
+            break;
+        case "users":
+            let mb_user = new user(data)
+            
+            await mb_user.insert().catch((err)=>{
+                console.log(err)
+                return res.send(false)
+            })
+            res.send(true)
+           
+         
+            
+            break;
+        default:
+            return res.send(false)
+            break;
+    }
 
 
 
-// })
+})
+router.post('/make_order', async(req,res)=>{
+    const {client_id, card} = req.body;
 
+    let new_order = new order({client_id:order.to_objId(client_id), goods:card, status:"created", employes:[]})
+    let result = await new_order.insert().catch((err)=>{
+        console.log(err)
+        return res.send(false)
+    })
+
+    let mb_user = new user({id:user.to_objId(client_id)})
+    let f_user = await mb_user.get_by_id().catch((err)=>{
+        console.log(err)
+        res.send(false)
+    })
+
+    if(f_user){
+    
+        f_user!.card = [];
+        await f_user.save();
+        
+    }
+    else
+        return res.send(false)
+
+    res.send(result)
+
+})
+router.post('/get_client_orders', async(req,res)=>{
+    const {client_id} = req.body;
+    let mb_ordrs = new order({client_id:order.to_objId(client_id)})
+    let results = await mb_ordrs.get_by_client_id().catch((err)=>{
+        console.log(err);
+        res.send(false)
+    })
+    if(results)
+        return res.send(results)
+    
+    res.send(false)
+
+})
+router.post('/create_ticket', async(req,res)=>{
+    const {client_id, reason, msg} = req.body;
+    let new_ticket = new ticket({client_id:ticket.to_objId(client_id), reason, msgs:[{
+        from_id:ticket.to_objId(client_id),
+        text:msg
+    }], status:"created"})
+    let result = await new_ticket.insert().catch((err)=>{
+        console.log(err)
+        return res.send(false)
+    })
+
+    res.send(result)
+
+})
+router.post("/get_all_tickets", async(req,res)=>{
+    let mb_tickets = new ticket({});
+    let all_tickets = await mb_tickets.get_all().catch((err)=>{
+        console.log(err)
+        return res.send(false)
+    })
+    res.send(all_tickets)
+})
+router.post('/get_ticket_by_id', async(req,res)=>{
+    const {ticket_id} = req.body;
+    let mb_ticket = new ticket({id:ticket.to_objId(ticket_id)});
+    let n_ticket = await mb_ticket.get_by_id().catch((err)=>{
+        console.log(err)
+        return res.send(false)
+    })
+    if(n_ticket)
+        return res.send(n_ticket)
+
+    // res.send(false)
+})
+router.post('/add_ticket_msg', async(req,res)=>{
+    const {user_id, ticket_id, msg} = req.body;
+    let mb_tick = new ticket({id:ticket.to_objId(ticket_id)})
+    let f_tick = await mb_tick.get_by_id().catch((err)=>{
+        console.log(err)
+        res.send(false)
+    })
+
+    if(f_tick){
+        
+        
+        f_tick!.msgs.push({
+            from_id:ticket.to_objId(user_id),
+            text:msg
+        });
+        await f_tick.save();
+        
+    }
+    else    
+        return res.send(false)
+    res.send(true)
+})
+
+router.post('/change_ticket_status', async(req,res)=>{
+    const{ticket_id, new_status} = req.body;
+
+    let mb_tick = new ticket({id:ticket.to_objId(ticket_id)})
+    let f_tick = await mb_tick.get_by_id().catch((err)=>{
+        console.log(err)
+        res.send(false)
+    })
+
+    if(f_tick){
+        
+        
+        f_tick!.status = new_status
+        await f_tick.save();
+        
+    }
+    else    
+        return res.send(false)
+    res.send(true)
+
+
+
+})
+router.post('/get_tickets_by_client_id', async(req,res)=>{
+    let mb_tick = new ticket({client_id:ticket.to_objId(req.body.client_id)})
+    let n_tick = await mb_tick.get_by_client_id().catch((err)=>{
+        console.log(err);
+        return res.send(false)
+    })
+    res.send(n_tick)
+})
 
 export default router;

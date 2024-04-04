@@ -3,7 +3,7 @@
         <div v-if="loaded" class="admin_wrapper">
             <div class="navigater">
                 <span class="name">
-                    <span @click="this.$router.push('/admin')" class="nav_click clickable">Админ-панель</span> >
+                    <span class="nav_click clickable" @click="$router.push('/profile')">Профиль</span> > <span @click="this.$router.push('/admin')" class="nav_click clickable">Админ-панель</span> >
                     <span class="nav_click">{{ $route.query.page }}</span>
 
                 </span>
@@ -117,7 +117,7 @@
                         </div>
                     </div>
 
-                    <buttonView @click="serv_redact(need_item._id)" text="Редактировать" clr="white" />
+                    <buttonView @click="serv_add(need_item._id)" text="Добавить" clr="white" style="background-color: green;"/>
                 </div>
 
             </div>
@@ -161,7 +161,10 @@ export default {
                 if (el._id == id)
                     this.need_item = el;
             });
-            this.red_obj = this.need_item
+            for(var key in this.need_item){
+                this.red_obj[key] = this.need_item[key]
+            }
+            // this.red_obj = this.need_item
             this.popup = true;
 
         },
@@ -171,9 +174,12 @@ export default {
             this.$router.go()
         },
         openAdd() {
-
-            this.add_obj = this.need_arr[0];
-            console.log(typeof this.add_obj['card'])
+            for (var key1 in this.need_arr[0]) {
+                this.add_obj[key1] = this.need_arr[0][key1]
+            }
+            delete this.add_obj['_id']
+            // this.add_obj = this.need_arr[0];
+            // console.log(typeof this.add_obj['card'])
             for (var key in this.add_obj) {
                 if (typeof this.add_obj[key] == 'string') {
                     this.add_obj[key] = ''

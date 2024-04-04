@@ -1,67 +1,67 @@
 
 import mongoose from 'mongoose';
-import orders, {IGood,IEmp} from '../models/orders';
+import tickets, {IMessage} from '../models/tickets';
 import DevFunc from '../Services/DevFunc';
-interface OrdersOptions {
+interface TicketsOptions {
     id?:mongoose.Types.ObjectId;
-    employes?: Array<IEmp>;
+    msgs?: Array<IMessage>;
     client_id?:mongoose.Types.ObjectId;
-    goods?:Array<IGood>;
+    reason?:String;
     status?:String;
 }
 
-export default class order extends DevFunc{
+export default class ticket extends DevFunc{
     private id?:mongoose.Types.ObjectId;
-    private employes?: Array<IEmp>;
+    private msgs?: Array<IMessage>;
     private client_id?:mongoose.Types.ObjectId;
-    private goods?:Array<IGood>;
+    private reason?:String;
     private status?:String;
 
 
     private db;
 
-    constructor(options:OrdersOptions){
+    constructor(options:TicketsOptions){
         super();
         this.id = options.id;
-        this.employes = options.employes;
+        this.msgs = options.msgs;
         this.client_id = options.client_id;
-        this.goods = options.goods;
+        this.reason = options.reason;
         this.status = options.status;
   
 
-        this.db = orders;
+        this.db = tickets;
     }
 
     public async insert(){
-        const new_order = new this.db({
-            employes:this.employes,
+        const new_ticket = new this.db({
+            msgs:this.msgs,
             client_id:this.client_id,
-            goods:this.goods,
+            reason:this.reason,
             status:this.status
             
         });
-        if(!this.employes || !this.client_id || !this.goods || !this.status)
+        if(!this.msgs || !this.client_id || !this.reason || !this.status)
             return Promise.reject("Empty params")
         
 
-        await new_order.save()
+        await new_ticket.save()
         return Promise.resolve("Inserted successfuly");
     }
     public async update(){
         if(!this.id)
             return Promise.reject("Empty id")
 
-        let need_order =  this.db.findById(this.id);
+        let need_ticket =  this.db.findById(this.id);
         
 
-        if(this.employes)
-            await need_order.updateOne({employes:this.employes})
+        if(this.msgs)
+            await need_ticket.updateOne({msgs:this.msgs})
         if(this.client_id)
-            await need_order.updateOne({client_id:this.client_id})
-        if(this.goods)
-            await need_order.updateOne({goods:this.goods})
+            await need_ticket.updateOne({client_id:this.client_id})
+        if(this.reason)
+            await need_ticket.updateOne({reason:this.reason})
         if(this.status)
-            await need_order.updateOne({status:this.status})
+            await need_ticket.updateOne({status:this.status})
         
         return Promise.resolve("Updated successfully");
     }
@@ -82,9 +82,9 @@ export default class order extends DevFunc{
     public async get_by_client_id(){
         if(!this.client_id)
             return Promise.reject("Empty client_id");
-        return await this.db.find({client_id:this.client_id})
+        
+        return await this.db.find({client_id:this.client_id});
     }
-
 
 
     
